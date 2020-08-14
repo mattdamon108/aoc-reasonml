@@ -1,24 +1,17 @@
-# Basic Reason Template
+# ReasonML practice
 
-Hello! This project allows you to quickly get started with Reason and BuckleScript. If you wanted a more sophisticated version, try the `react` template (`bsb -theme react -init .`).
+> with [Advent of Code](https://adventofcode.com/)
 
 # Build
 
-```bash
-# for yarn
-yarn build
+- watch mode
 
-# for npm
-npm run build
+```shell
+$ npm run start
 ```
 
-# Build + Watch
+# Run
 
-```bash
-# for yarn
-yarn start
-
-# for npm
-npm run start
+```shell
+$ gw node src/Day01.bs.js
 ```
-
