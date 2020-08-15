@@ -31,7 +31,7 @@ var max = Belt_List.reduce(listOfHead, 0, (function (acc, item) {
         }
       }));
 
-var listOftails = Belt_List.map(input, (function (a) {
+var listOfTail = Belt_List.map(input, (function (a) {
         return Belt_List.reduce(a, max, (function (acc, item) {
                       if (acc > item) {
                         return item;
@@ -65,7 +65,7 @@ function computeRemainder(xs, ys) {
               })) / 2 | 0;
 }
 
-console.log(Belt_List.reduce(Belt_List.map(Belt_List.zip(listOfHead, listOftails), (function (param) {
+console.log(Belt_List.reduce(Belt_List.map(Belt_List.zip(listOfHead, listOfTail), (function (param) {
                 return param[0] - param[1] | 0;
               })), 0, (function (prim, prim$1) {
             return prim + prim$1 | 0;
@@ -84,7 +84,7 @@ var part2;
 exports.input = input;
 exports.listOfHead = listOfHead;
 exports.max = max;
-exports.listOftails = listOftails;
+exports.listOfTail = listOfTail;
 exports.getFlatRemainder = getFlatRemainder;
 exports.computeRemainder = computeRemainder;
 exports.part1 = part1;

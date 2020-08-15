@@ -17,7 +17,7 @@ let listOfHead =
 
 let max = List.reduce(listOfHead, 0, (acc, item) => acc > item ? acc : item);
 
-let listOftails =
+let listOfTail =
   input->List.map(a =>
     List.reduce(a, max, (acc, item) => acc > item ? item : acc)
   );
@@ -45,7 +45,7 @@ let computeRemainder = (xs, ys) => {
 //   ->Js.log;
 
 let part1 =
-  List.zip(listOfHead, listOftails)
+  List.zip(listOfHead, listOfTail)
   ->List.map(((x, y)) => x - y)
   ->List.reduce(0, (+))
   ->Js.log;
