@@ -51,7 +51,4 @@ let part1 =
   ->Js.log;
 
 let part2 =
-  input
-  ->List.map(a => computeRemainder(a, a))
-  ->List.reduce(0, (acc, item) => acc + item)
-  ->Js.log;
+  input->List.map(a => computeRemainder(a, a))->List.reduce(0, (+))->Js.log;

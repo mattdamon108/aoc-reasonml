@@ -73,8 +73,8 @@ console.log(Belt_List.reduce(Belt_List.map(Belt_List.zip(listOfHead, listOfTail)
 
 console.log(Belt_List.reduce(Belt_List.map(input, (function (a) {
                 return computeRemainder(a, a);
-              })), 0, (function (acc, item) {
-            return acc + item | 0;
+              })), 0, (function (prim, prim$1) {
+            return prim + prim$1 | 0;
           })));
 
 var part1;
