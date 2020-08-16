@@ -60,8 +60,8 @@ function computeRemainder(xs, ys) {
                     return Belt_List.reduce(ys, 0, (function (acc, item) {
                                   return acc + getFlatRemainder(a, item) | 0;
                                 }));
-                  })), 0, (function (acc, item) {
-                return acc + item | 0;
+                  })), 0, (function (prim, prim$1) {
+                return prim + prim$1 | 0;
               })) / 2 | 0;
 }
 

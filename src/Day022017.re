@@ -35,7 +35,7 @@ let computeRemainder = (xs, ys) => {
   List.map(xs, a => {
     List.reduce(ys, 0, (acc, item) => acc + getFlatRemainder(a, item))
   })
-  ->List.reduce(0, (acc, item) => acc + item)
+  ->List.reduce(0, (+))
   / 2;
 };
 
