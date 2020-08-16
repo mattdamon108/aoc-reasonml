@@ -87,24 +87,28 @@ let rec walker = (input, moves, x, y, prev_dir) => {
     switch (prev_dir) {
     | None => walker(input, [|(0, 0, 1)|], 1, 0, Some(Right))
     | Some(Right) =>
+      // peek Right more then change the direction to Up
       if (sum_of_adjacent(new_moves, x + 1, y) == value) {
         walker(input, new_moves, x, y - 1, Some(Up));
       } else {
         walker(input, new_moves, x + 1, y, Some(Right));
       }
     | Some(Up) =>
+      // peek Up more then change the direction to Left
       if (sum_of_adjacent(new_moves, x, y - 1) == value) {
         walker(input, new_moves, x - 1, y, Some(Left));
       } else {
         walker(input, new_moves, x, y - 1, Some(Up));
       }
     | Some(Left) =>
+      // peek Left more then change the direction to Down
       if (sum_of_adjacent(new_moves, x - 1, y) == value) {
         walker(input, new_moves, x, y + 1, Some(Down));
       } else {
         walker(input, new_moves, x - 1, y, Some(Left));
       }
     | Some(Down) =>
+      // peek Down more then change the direction to Right
       if (sum_of_adjacent(new_moves, x, y + 1) == value) {
         walker(input, new_moves, x + 1, y, Some(Right));
       } else {
