@@ -43,9 +43,23 @@ console.log(runner(input, 0, 0));
 
 console.log(runner_hop(input2, 0, 0));
 
+var arr1 = [
+  1,
+  2,
+  3
+];
+
+Belt_Array.set(arr1, 0, 5);
+
+console.log(arr1);
+
+console.log(arr1);
+
 var part1;
 
 var part2;
+
+var arr2 = arr1;
 
 exports.input = input;
 exports.input2 = input2;
@@ -53,4 +67,6 @@ exports.runner = runner;
 exports.runner_hop = runner_hop;
 exports.part1 = part1;
 exports.part2 = part2;
+exports.arr1 = arr1;
+exports.arr2 = arr2;
 /* input Not a pure module */
