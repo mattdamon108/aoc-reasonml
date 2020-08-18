@@ -16,9 +16,8 @@ let rec runner = (maze, idx, count) => {
   switch (maze[idx]) {
   | None => count
   | Some(jump) =>
-    let new_maze = maze;
-    let _ = new_maze[idx] = jump + 1;
-    runner(new_maze, idx + jump, count + 1);
+    let _ = maze[idx] = jump + 1;
+    runner(maze, idx + jump, count + 1);
   };
 };
 
@@ -26,16 +25,15 @@ let rec runner_hop = (maze, idx, count) => {
   switch (maze[idx]) {
   | None => count
   | Some(jump) =>
-    let new_maze = maze;
     let _ =
-      new_maze[idx] = (
+      maze[idx] = (
         if (jump >= 3) {
           jump - 1;
         } else {
           jump + 1;
         }
       );
-    runner_hop(new_maze, idx + jump, count + 1);
+    runner_hop(maze, idx + jump, count + 1);
   };
 };
 
