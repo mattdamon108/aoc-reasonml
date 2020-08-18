@@ -46,8 +46,8 @@ let part2 = input2->runner_hop(0, 0)->Js.log;
 let arr1 = [|1, 2, 3|];
 let arr2 = arr1;
 arr2[0] = 5;
-arr1->Js.log;
-arr2->Js.log;
+arr1->Js.log; // [|5, 2, 3|]
+arr2->Js.log; // [|5, 2, 3|]
 
 /*
  * 1. Array의 mutable 주의
