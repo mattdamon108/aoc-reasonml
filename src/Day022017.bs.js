@@ -7,8 +7,8 @@ var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Caml_int32 = require("bs-platform/lib/js/caml_int32.js");
 var Caml_format = require("bs-platform/lib/js/caml_format.js");
 
-var input = Belt_List.map(Belt_List.fromArray(Belt_Array.map(Fs.readFileSync("input/day0201", "utf8").split("\n"), (function (a) {
-                return a.split("\t");
+var input = Belt_List.map(Belt_List.fromArray(Belt_Array.map(Fs.readFileSync("input/day0201", "utf8").split("\n"), (function (__x) {
+                return __x.split("\t");
               }))), (function (a) {
         return Belt_List.map(Belt_List.fromArray(a), Caml_format.caml_int_of_string);
       }));
@@ -55,9 +55,9 @@ function getFlatRemainder(x, y) {
   }
 }
 
-function computeRemainder(xs, ys) {
+function computeRemainder(xs) {
   return Belt_List.reduce(Belt_List.map(xs, (function (a) {
-                    return Belt_List.reduce(ys, 0, (function (acc, item) {
+                    return Belt_List.reduce(xs, 0, (function (acc, item) {
                                   return acc + getFlatRemainder(a, item) | 0;
                                 }));
                   })), 0, (function (prim, prim$1) {
@@ -71,9 +71,7 @@ console.log(Belt_List.reduce(Belt_List.map(Belt_List.zip(listOfHead, listOfTail)
             return prim + prim$1 | 0;
           })));
 
-console.log(Belt_List.reduce(Belt_List.map(input, (function (a) {
-                return computeRemainder(a, a);
-              })), 0, (function (prim, prim$1) {
+console.log(Belt_List.reduce(Belt_List.map(input, computeRemainder), 0, (function (prim, prim$1) {
             return prim + prim$1 | 0;
           })));
 

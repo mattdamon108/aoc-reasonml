@@ -6,9 +6,9 @@ open Belt;
 let input =
   Node_fs.readFileAsUtf8Sync("input/day0201")
   ->Js.String.split("\n", _)
-  ->Array.map(a => Js.String.split("\t", a))
+  ->Array.map(Js.String.split("\t", _))
   ->List.fromArray
-  ->List.map(a => List.fromArray(a)->List.map(a => int_of_string(a)));
+  ->List.map(a => List.fromArray(a)->List.map(int_of_string));
 
 let listOfHead =
   input->List.map(a =>
@@ -24,16 +24,16 @@ let listOfTail =
 
 let getFlatRemainder = (x, y) =>
   if (x > y) {
-    x mod y == 0 ? x / y : 0;
+    x mod y === 0 ? x / y : 0;
   } else if (y > x) {
-    y mod x == 0 ? y / x : 0;
+    y mod x === 0 ? y / x : 0;
   } else {
     0;
   };
 
-let computeRemainder = (xs, ys) => {
+let computeRemainder = xs => {
   List.map(xs, a => {
-    List.reduce(ys, 0, (acc, item) => acc + getFlatRemainder(a, item))
+    List.reduce(xs, 0, (acc, item) => acc + getFlatRemainder(a, item))
   })
   ->List.reduce(0, (+))
   / 2;
@@ -50,5 +50,4 @@ let part1 =
   ->List.reduce(0, (+))
   ->Js.log;
 
-let part2 =
-  input->List.map(a => computeRemainder(a, a))->List.reduce(0, (+))->Js.log;
+let part2 = input->List.map(computeRemainder)->List.reduce(0, (+))->Js.log;
