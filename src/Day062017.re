@@ -64,40 +64,37 @@ let distribute = banks => {
  ]
  */
 
-let rec runner = (banks, history) => {
+let rec runner = (banks, ~history=?, ()) => {
   let distributed_banks = distribute(Array.copy(banks));
   switch (history) {
   | None =>
     runner(
       distributed_banks,
-      Some([|Array.copy(banks), distributed_banks|]),
+      ~history=[|Array.copy(banks), distributed_banks|],
+      (),
     )
   | Some(past) =>
-    let is_exists =
-      Array.reduce(past, 0, (acc, item) => {
-        item == distributed_banks ? acc + 1 : acc
-      })
-      > 0;
+    let is_exists = Array.getIndexBy(past, item => item == distributed_banks);
 
-    if (!is_exists) {
+    switch (is_exists) {
+    | None =>
       runner(
         distributed_banks,
-        Some(Array.concat(past, [|distributed_banks|])),
-      );
-    } else {
-      let matched_idx =
-        Array.getIndexBy(past, item => item == distributed_banks);
-      switch (matched_idx) {
-      | None => (Array.length(past), Array.length(past))
-      | Some(offset) => (Array.length(past), Array.length(past) - offset)
-      };
+        ~history=Array.concat(past, [|distributed_banks|]),
+        (),
+      )
+    | Some(idx) => (Array.length(past), Array.length(past) - idx)
     };
   };
 };
 
-let part1_2 = input->runner(None)->Js.log;
+let part1_2 = input->runner()->Js.log;
 
 /*
  1. structural comparison == 👍
  2. runner()로 하려면 named argument와 optional을 어떻게 써야할까..?
+ 3. optional labeled argument의 뒤에 unit을 붙이는 convention은 curried 여부의 결정 때문.
+
+  let uncurried = runner(banks, ());
+  let curried = runner(banks);
  */

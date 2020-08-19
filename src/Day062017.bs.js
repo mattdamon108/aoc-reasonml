@@ -44,43 +44,29 @@ function distribute(banks) {
               }));
 }
 
-function runner(_banks, _history) {
+function runner(_banks, _history, _param) {
   while(true) {
     var history = _history;
     var banks = _banks;
     var distributed_banks = distribute(banks.slice(0));
     if (history !== undefined) {
-      var is_exists = Belt_Array.reduce(history, 0, (function(distributed_banks){
-          return function (acc, item) {
-            if (Caml_obj.caml_equal(item, distributed_banks)) {
-              return acc + 1 | 0;
-            } else {
-              return acc;
-            }
+      var is_exists = Belt_Array.getIndexBy(history, (function(distributed_banks){
+          return function (item) {
+            return Caml_obj.caml_equal(item, distributed_banks);
           }
-          }(distributed_banks))) > 0;
-      if (is_exists) {
-        var matched_idx = Belt_Array.getIndexBy(history, (function(distributed_banks){
-            return function (item) {
-              return Caml_obj.caml_equal(item, distributed_banks);
-            }
-            }(distributed_banks)));
-        if (matched_idx !== undefined) {
-          return [
-                  history.length,
-                  history.length - matched_idx | 0
-                ];
-        } else {
-          return [
-                  history.length,
-                  history.length
-                ];
-        }
+          }(distributed_banks)));
+      if (is_exists !== undefined) {
+        return [
+                history.length,
+                history.length - is_exists | 0
+              ];
       }
+      _param = undefined;
       _history = Belt_Array.concat(history, [distributed_banks]);
       _banks = distributed_banks;
       continue ;
     }
+    _param = undefined;
     _history = [
       banks.slice(0),
       distributed_banks
@@ -90,7 +76,7 @@ function runner(_banks, _history) {
   };
 }
 
-console.log(runner(input, undefined));
+console.log(runner(input, undefined, undefined));
 
 var part1_2;
 
