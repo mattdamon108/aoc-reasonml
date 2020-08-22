@@ -37,25 +37,6 @@ let parse = input => {
   ->Map.String.fromArray;
 };
 
-let parse_children = input => {
-  Array.map(input, Js.String.split(" -> "))
-  ->Array.reduce([||], (acc, item) => {
-      switch (item[1]) {
-      | Some(_) => acc
-      | None =>
-        switch (item[0]) {
-        | None => acc
-        | Some(child) =>
-          let c = Js.String2.split(child, " ");
-          switch (c[0]) {
-          | None => acc
-          | Some(name) => Array.concat(acc, [|Js.String.trim(name)|])
-          };
-        }
-      }
-    });
-};
-
 let parse_weight = input => {
   Array.map(input, Js.String.split(" -> "))
   ->Array.map(item => {

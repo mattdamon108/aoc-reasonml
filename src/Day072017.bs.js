@@ -37,28 +37,6 @@ function parse(input) {
                   })));
 }
 
-function parse_children(input) {
-  return Belt_Array.reduce(Belt_Array.map(input, (function (param) {
-                    return param.split(" -> ");
-                  })), [], (function (acc, item) {
-                var match = Belt_Array.get(item, 1);
-                if (match !== undefined) {
-                  return acc;
-                }
-                var child = Belt_Array.get(item, 0);
-                if (child === undefined) {
-                  return acc;
-                }
-                var c = child.split(" ");
-                var name = Belt_Array.get(c, 0);
-                if (name !== undefined) {
-                  return Belt_Array.concat(acc, [name.trim()]);
-                } else {
-                  return acc;
-                }
-              }));
-}
-
 function parse_weight(input) {
   return Belt_MapString.fromArray(Belt_Array.reduce(Belt_Array.map(Belt_Array.reduce(Belt_Array.map(Belt_Array.map(input, (function (param) {
                                     return param.split(" -> ");
@@ -182,7 +160,6 @@ var part2;
 
 exports.input = input;
 exports.parse = parse;
-exports.parse_children = parse_children;
 exports.parse_weight = parse_weight;
 exports.find_root = find_root;
 exports.root = root;
