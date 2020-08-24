@@ -116,3 +116,9 @@ let get_part2 = result => {
 
 result->get_part1->Js.log;
 result->get_part2->Js.log;
+
+/**
+ * 1. result type 조으다
+ * 2. switch가 너무 중첩될 것 같으면 Belt.Option.getExn 혹은 Belt.Option.getUnsafe 들이
+ *    대안이 될 듯 하다.
+ */;
