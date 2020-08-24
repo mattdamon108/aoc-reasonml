@@ -128,7 +128,7 @@ function sum_of_weight(name) {
     if (children.length !== 0) {
       return weight_of_children + sum_of_weight$prime(children.slice(0)) | 0;
     } else {
-      return 0;
+      return weight_of_children;
     }
   };
   return sum_of_weight$prime([name]) + Belt_MapString.getWithDefault(map_of_weight, name, 0) | 0;

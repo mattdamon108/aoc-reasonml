@@ -125,7 +125,8 @@ let sum_of_weight = name => {
       );
 
     Array.length(children) > 0
-      ? weight_of_children + sum_of_weight'(Array.copy(children)) : 0;
+      ? weight_of_children + sum_of_weight'(Array.copy(children))
+      : weight_of_children;
   };
 
   sum_of_weight'([|name|])
