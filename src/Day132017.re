@@ -38,8 +38,8 @@ let num_of_caught = input => {
 };
 
 // delay to start a trip means layer + delay
-let num_of_caught_in_delay = input => {
-  let rec computer = delay => {
+let delay_not_to_be_caught = input => {
+  let rec simulator = delay => {
     let num_of_caught_after_delay =
       input->Array.reduce(0, (sum, layer) => {
         switch (layer[0]) {
@@ -53,10 +53,10 @@ let num_of_caught_in_delay = input => {
         }
       });
 
-    num_of_caught_after_delay === 0 ? delay : computer(delay + 1);
+    num_of_caught_after_delay === 0 ? delay : simulator(delay + 1);
   };
 
-  computer(0);
+  simulator(0);
 };
 
 let input =
@@ -65,7 +65,7 @@ let input =
   ->Array.map(row => Js.String2.split(row, ": ")->Array.map(int_of_string));
 
 let part1 = input->num_of_caught->Js.log;
-let part2 = input->num_of_caught_in_delay->Js.log;
+let part2 = input->delay_not_to_be_caught->Js.log;
 
 /**
  * 새로운 방식을 시도해보려고 했으나 그럴 여지가 별로 없었나보다.. (핑계)

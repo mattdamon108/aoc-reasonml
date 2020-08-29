@@ -37,7 +37,7 @@ function num_of_caught(input) {
               }));
 }
 
-function num_of_caught_in_delay(input) {
+function delay_not_to_be_caught(input) {
   var _delay = 0;
   while(true) {
     var delay = _delay;
@@ -69,7 +69,7 @@ var input = Belt_Array.map(Fs.readFileSync("input/day13", "utf8").split("\n"), (
 
 console.log(num_of_caught(input));
 
-console.log(num_of_caught_in_delay(input));
+console.log(delay_not_to_be_caught(input));
 
 var part1;
 
@@ -79,7 +79,7 @@ exports.steps_to_comeback = steps_to_comeback;
 exports.get_caught = get_caught;
 exports.severity = severity;
 exports.num_of_caught = num_of_caught;
-exports.num_of_caught_in_delay = num_of_caught_in_delay;
+exports.delay_not_to_be_caught = delay_not_to_be_caught;
 exports.input = input;
 exports.part1 = part1;
 exports.part2 = part2;
