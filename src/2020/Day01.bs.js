@@ -84,7 +84,9 @@ function compute3(_xs, num) {
 
 var match = compute2(input, 2020);
 
-console.log(Math.imul(match[0], match[1]));
+var part1 = Math.imul(match[0], match[1]);
+
+console.log(part1);
 
 var match$1 = compute3(input, 2020);
 
@@ -94,11 +96,9 @@ var b = match$1[1];
 
 var a = match$1[0];
 
-console.log(Math.imul(Math.imul(a, b), c));
+var part2 = Math.imul(Math.imul(a, b), c);
 
-var part1;
-
-var part2;
+console.log(part2);
 
 exports.inputTest = inputTest;
 exports.input = input;

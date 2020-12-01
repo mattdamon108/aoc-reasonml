@@ -52,7 +52,9 @@ let rec compute3 = (xs, num) => {
 };
 
 let (a, b) = compute2(input, 2020);
-let part1 = (a * b)->Js.log;
+let part1 = a * b;
+part1->Js.log;
 
 let (a, b, c) = compute3(input, 2020);
-let part2 = (a * b * c)->Js.log;
+let part2 = a * b * c;
+part2->Js.log;
