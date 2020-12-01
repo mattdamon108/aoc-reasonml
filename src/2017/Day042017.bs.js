@@ -5,7 +5,7 @@ var Fs = require("fs");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Belt_SetString = require("bs-platform/lib/js/belt_SetString.js");
 
-var input = Belt_Array.map(Fs.readFileSync("input/day04", "utf8").split("\n"), (function (row) {
+var input = Belt_Array.map(Fs.readFileSync("input/2017/day04", "utf8").split("\n"), (function (row) {
         return row.trim().split(" ");
       }));
 

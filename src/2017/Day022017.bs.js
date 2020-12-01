@@ -7,7 +7,7 @@ var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Caml_int32 = require("bs-platform/lib/js/caml_int32.js");
 var Caml_format = require("bs-platform/lib/js/caml_format.js");
 
-var input = Belt_List.map(Belt_List.fromArray(Belt_Array.map(Fs.readFileSync("input/day0201", "utf8").split("\n"), (function (__x) {
+var input = Belt_List.map(Belt_List.fromArray(Belt_Array.map(Fs.readFileSync("input/2017/day0201", "utf8").split("\n"), (function (__x) {
                 return __x.split("\t");
               }))), (function (a) {
         return Belt_List.map(Belt_List.fromArray(a), Caml_format.caml_int_of_string);

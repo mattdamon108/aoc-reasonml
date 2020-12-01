@@ -4,7 +4,7 @@
 open Belt;
 
 let input =
-  Node_fs.readFileAsUtf8Sync("input/day0201")
+  Node_fs.readFileAsUtf8Sync("input/2017/day0201")
   ->Js.String.split("\n", _)
   ->Array.map(Js.String.split("\t", _))
   ->List.fromArray

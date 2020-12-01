@@ -4,7 +4,7 @@
 open Belt;
 
 let input =
-  Node_fs.readFileAsUtf8Sync("input/day07")->Js.String2.split("\n");
+  Node_fs.readFileAsUtf8Sync("input/2017/day07")->Js.String2.split("\n");
 
 // [|"abb (55)", "baa (34) -> cdd, dee", "cdd (47) -> abb", "dee (33)"|]
 // -> Map.String((child, parent)) = [("cdd", "baa"), ("dee", "baa"), ...]

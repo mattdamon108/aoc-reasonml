@@ -5,7 +5,7 @@
 open Belt;
 
 let input =
-  Node_fs.readFileAsUtf8Sync("input/day06")
+  Node_fs.readFileAsUtf8Sync("input/2017/day06")
   ->Js.String2.split("\t")
   ->Array.map(Pervasives.int_of_string);
 

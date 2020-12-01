@@ -4,7 +4,7 @@
 open Belt;
 
 let input =
-  Node_fs.readFileAsUtf8Sync("input/day08")->Js.String2.split("\n");
+  Node_fs.readFileAsUtf8Sync("input/2017/day08")->Js.String2.split("\n");
 
 let compute = (map_of_reg, reg, value, op) => {
   let prev_value = Map.String.get(map_of_reg, reg);

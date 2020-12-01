@@ -7,7 +7,7 @@ var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Caml_int32 = require("bs-platform/lib/js/caml_int32.js");
 var Caml_format = require("bs-platform/lib/js/caml_format.js");
 
-var input = Belt_Array.map(Fs.readFileSync("input/day06", "utf8").split("\t"), Caml_format.caml_int_of_string);
+var input = Belt_Array.map(Fs.readFileSync("input/2017/day06", "utf8").split("\t"), Caml_format.caml_int_of_string);
 
 function distribute(banks) {
   var bank_in_full = Belt_Array.reduceWithIndex(banks, [

@@ -6,7 +6,7 @@ var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Caml_format = require("bs-platform/lib/js/caml_format.js");
 var Belt_MapString = require("bs-platform/lib/js/belt_MapString.js");
 
-var input = Fs.readFileSync("input/day07", "utf8").split("\n");
+var input = Fs.readFileSync("input/2017/day07", "utf8").split("\n");
 
 function parse(input) {
   return Belt_MapString.fromArray(Belt_Array.reduce(Belt_Array.map(input, (function (param) {

@@ -5,7 +5,7 @@ var Fs = require("fs");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Caml_format = require("bs-platform/lib/js/caml_format.js");
 
-var input = Belt_Array.map(Fs.readFileSync("input/day05", "utf8").trim().split("\n"), Caml_format.caml_int_of_string);
+var input = Belt_Array.map(Fs.readFileSync("input/2017/day05", "utf8").trim().split("\n"), Caml_format.caml_int_of_string);
 
 var input2 = input.slice(0);
 

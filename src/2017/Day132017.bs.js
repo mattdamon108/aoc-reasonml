@@ -63,7 +63,7 @@ function delay_not_to_be_caught(input) {
   };
 }
 
-var input = Belt_Array.map(Fs.readFileSync("input/day13", "utf8").split("\n"), (function (row) {
+var input = Belt_Array.map(Fs.readFileSync("input/2017/day13", "utf8").split("\n"), (function (row) {
         return Belt_Array.map(row.split(": "), Caml_format.caml_int_of_string);
       }));
 

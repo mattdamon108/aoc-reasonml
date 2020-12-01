@@ -8,7 +8,7 @@ var Belt_Option = require("bs-platform/lib/js/belt_Option.js");
 var Caml_format = require("bs-platform/lib/js/caml_format.js");
 var Belt_MapString = require("bs-platform/lib/js/belt_MapString.js");
 
-var input = Fs.readFileSync("input/day08", "utf8").split("\n");
+var input = Fs.readFileSync("input/2017/day08", "utf8").split("\n");
 
 function compute(map_of_reg, reg, value, op) {
   var prev_value = Belt_MapString.get(map_of_reg, reg);

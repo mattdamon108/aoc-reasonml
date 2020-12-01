@@ -60,7 +60,7 @@ let delay_not_to_be_caught = input => {
 };
 
 let input =
-  Node_fs.readFileAsUtf8Sync("input/day13")
+  Node_fs.readFileAsUtf8Sync("input/2017/day13")
   ->Js.String2.split("\n")
   ->Array.map(row => Js.String2.split(row, ": ")->Array.map(int_of_string));
 
