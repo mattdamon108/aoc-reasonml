@@ -13,5 +13,8 @@
   "license": "MIT",
   "devDependencies": {
     "bs-platform": "^8.2.0"
+  },
+  "dependencies": {
+    "bs-let": "^0.1.16"
   }
 }
