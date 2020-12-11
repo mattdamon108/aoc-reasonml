@@ -1,5 +1,3 @@
-open Belt;
-
 let inputTest =
   Node_fs.readFileAsUtf8Sync("input/2020/day02test")
   ->Js.String2.trim(_)
