@@ -15,6 +15,7 @@
     "bs-platform": "^8.2.0"
   },
   "dependencies": {
-    "bs-let": "^0.1.16"
+    "bs-let": "^0.1.16",
+    "google-closure-library": "^20201102.0.1"
   }
 }

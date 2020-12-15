@@ -11,3 +11,8 @@ bs-platform@^8.2.0:
   version "8.3.3"
   resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-8.3.3.tgz#68e3796ad0607c55da0f45fe14c0ce0aaf69682c"
   integrity sha512-ayS5wdvrOX6PxU2wX7O2rLllzsQDzmGq582NNDFwfM6b9HQu7ki242Pc46o2/CnGHHumKVarpX0IZzjC2Llgcg==
+
+google-closure-library@^20201102.0.1:
+  version "20201102.0.1"
+  resolved "https://registry.yarnpkg.com/google-closure-library/-/google-closure-library-20201102.0.1.tgz#4cd8820c0b69cd8ebb85e128cc919bcd655bafae"
+  integrity sha512-YU1iL1l9l1KUpG4wPZJBVYwlWOw6/Qe5B4bPQ+CS1/omTPEUV/RV6qEUqcgDQIQSyufgTJC5t508wgNgtAkbGQ==
