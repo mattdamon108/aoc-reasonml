@@ -238,16 +238,16 @@ function parse(instructions) {
     var op_of_condition = Belt_Option.getExn(Belt_Array.get(splitted, 5));
     var val_of_condition = Belt_Option.getExn(Belt_Array.get(splitted, 6));
     var new_map = check_condition(map_of_reg$prime, reg_of_condition, val_of_condition, op_of_condition);
-    if (new_map.TAG) {
+    if (new_map.TAG === /* Ok */0) {
+      var result = compute(new_map._0, reg_of_computation, val_of_computation, op_of_computation);
       _val_of_peak$prime = next_peak;
       _instructions$prime = rest;
-      _map_of_reg$prime = new_map._0;
+      _map_of_reg$prime = result;
       continue ;
     }
-    var result = compute(new_map._0, reg_of_computation, val_of_computation, op_of_computation);
     _val_of_peak$prime = next_peak;
     _instructions$prime = rest;
-    _map_of_reg$prime = result;
+    _map_of_reg$prime = new_map._0;
     continue ;
   };
 }

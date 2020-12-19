@@ -43,7 +43,7 @@ let part2 = input2->runner_hop(0, 0)->Js.log;
 // arr를 새로 let binding 해도 참조 된다.
 let arr1 = [|1, 2, 3|];
 let arr2 = arr1;
-arr2[0] = 5;
+let _ = arr2[0] = 5;
 arr1->Js.log; // [|5, 2, 3|]
 arr2->Js.log; // [|5, 2, 3|]
 

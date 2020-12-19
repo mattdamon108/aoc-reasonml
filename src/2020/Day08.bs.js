@@ -82,10 +82,10 @@ function interpret(inst, _cur, _acc, _history) {
 
 function run(instructions) {
   var acc = interpret(instructions, 0, 0, []);
-  if (acc.TAG) {
-    return acc._0;
-  } else {
+  if (acc.TAG === /* Ok */0) {
     return -1;
+  } else {
+    return acc._0;
   }
 }
 
@@ -113,7 +113,7 @@ function patch(brokenInstructions) {
     var brokenPos = _brokenPos;
     var instructions = _instructions;
     var ac = interpret(instructions, 0, 0, []);
-    if (!ac.TAG) {
+    if (ac.TAG === /* Ok */0) {
       return ac._0;
     }
     var match = finder(instructions, brokenPos);
