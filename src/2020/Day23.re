@@ -41,7 +41,7 @@ module type CrabCups = {
   type cup = int;
   type cups = array(cup);
   let parse: (string, int) => array(cup);
-  let target: (cups, cup, cup, cup, cup) => cup;
+  let target: (cup, cup, cup, cup, cup) => cup;
   let move: (array(cup), cup, int) => array(cup);
 };
 
@@ -68,61 +68,37 @@ module CrabCups: CrabCups = {
     next;
   };
 
-  let target = (next, cur, pick1, pick2, pick3) => {
-    let rec seek = i =>
-      if (cur - i > 0) {
-        if (cur - i !== pick1 && cur - i !== pick2 && cur - i !== pick3) {
-          let rec seek2 = (v, count) => {
-            let n = next->Array.getExn(v);
-            if (count > next->Array.length) {
-              seek(i + 1);
-            } else if (n === cur - i) {
-              n;
-            } else {
-              seek2(n, count + 1);
-            };
-          };
-
-          seek2(pick3, 0);
+  let target = (cur, pick1, pick2, pick3, mc) => {
+    let rec seek = offset => {
+      let target = cur - offset;
+      if (target > 0) {
+        if (target !== pick1 && target !== pick2 && target !== pick3) {
+          target;
         } else {
-          seek(i + 1);
+          seek(offset + 1);
         };
       } else {
-        let length = next->Array.length;
-        let max =
-          [|length - 1, length - 2, length - 3, length - 4|]
-          ->Array.keep(m => {
-              !(m === cur || m === pick1 || m === pick2 || m === pick3)
-            })
-          ->Array.reduce(0, max);
-
-        let rec seek2 = (v, count) => {
-          let n = next->Array.getExn(v);
-          if (count > next->Array.length) {
-            seek(i + 1);
-          } else if (n === max) {
-            n;
-          } else {
-            seek2(n, count + 1);
-          };
-        };
-
-        seek2(pick3, 0);
+        [|mc, mc - 1, mc - 2, mc - 3, mc - 4|]
+        ->Array.keep(i =>
+            !(i === cur || i === pick1 || i === pick2 || i === pick3)
+          )
+        ->Array.reduce(0, max);
       };
+    };
 
     seek(1);
   };
 
   let move = (next, first, count) => {
+    let maxCup = next->Array.reduce(0, max);
     let rec m = (nx, cur, c) =>
       if (c === 0) {
         nx;
       } else {
-        c mod 100 === 0 ? Js.log(c) : ();
         let pick1 = nx->Array.getExn(cur);
         let pick2 = nx->Array.getExn(pick1);
         let pick3 = nx->Array.getExn(pick2);
-        let target = target(nx, cur, pick1, pick2, pick3);
+        let target = target(cur, pick1, pick2, pick3, maxCup);
         let nextTarget = nx->Array.getExn(target);
         let nextPick3 = nx->Array.getExn(pick3);
         nx->Array.set(target, pick1)->ignore;
@@ -144,7 +120,7 @@ let rec part1 = (next, after, acc) => {
 
 let part2 = next => {
   let nextOne = next->Array.getExn(1);
-  nextOne * next->Array.getExn(nextOne);
+  nextOne->float_of_int *. next->Array.getExn(nextOne)->float_of_int;
 };
 
 // part1

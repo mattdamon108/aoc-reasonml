@@ -90,69 +90,44 @@ function parse(data, addition) {
   return next;
 }
 
-function target(next, cur, pick1, pick2, pick3) {
-  var seek = function (_i) {
-    while(true) {
-      var i = _i;
-      if ((cur - i | 0) > 0) {
-        if ((cur - i | 0) !== pick1 && (cur - i | 0) !== pick2 && (cur - i | 0) !== pick3) {
-          var _v = pick3;
-          var _count = 0;
-          while(true) {
-            var count = _count;
-            var v = _v;
-            var n = Belt_Array.getExn(next, v);
-            if (count > next.length) {
-              return seek(i + 1 | 0);
-            }
-            if (n === (cur - i | 0)) {
-              return n;
-            }
-            _count = count + 1 | 0;
-            _v = n;
-            continue ;
-          };
-        }
-        _i = i + 1 | 0;
-        continue ;
-      }
-      var length = next.length;
-      var max = Belt_Array.reduce(Belt_Array.keep([
-                length - 1 | 0,
-                length - 2 | 0,
-                length - 3 | 0,
-                length - 4 | 0
-              ], (function (m) {
-                  return !(m === cur || m === pick1 || m === pick2 || m === pick3);
-                })), 0, (function (prim, prim$1) {
-              if (prim > prim$1) {
-                return prim;
-              } else {
-                return prim$1;
-              }
-            }));
-      var _v$1 = pick3;
-      var _count$1 = 0;
-      while(true) {
-        var count$1 = _count$1;
-        var v$1 = _v$1;
-        var n$1 = Belt_Array.getExn(next, v$1);
-        if (count$1 > next.length) {
-          return seek(i + 1 | 0);
-        }
-        if (n$1 === max) {
-          return n$1;
-        }
-        _count$1 = count$1 + 1 | 0;
-        _v$1 = n$1;
-        continue ;
-      };
-    };
+function target(cur, pick1, pick2, pick3, mc) {
+  var _offset = 1;
+  while(true) {
+    var offset = _offset;
+    var target$1 = cur - offset | 0;
+    if (target$1 <= 0) {
+      return Belt_Array.reduce(Belt_Array.keep([
+                      mc,
+                      mc - 1 | 0,
+                      mc - 2 | 0,
+                      mc - 3 | 0,
+                      mc - 4 | 0
+                    ], (function (i) {
+                        return !(i === cur || i === pick1 || i === pick2 || i === pick3);
+                      })), 0, (function (prim, prim$1) {
+                    if (prim > prim$1) {
+                      return prim;
+                    } else {
+                      return prim$1;
+                    }
+                  }));
+    }
+    if (target$1 !== pick1 && target$1 !== pick2 && target$1 !== pick3) {
+      return target$1;
+    }
+    _offset = offset + 1 | 0;
+    continue ;
   };
-  return seek(1);
 }
 
 function move(next, first, count) {
+  var maxCup = Belt_Array.reduce(next, 0, (function (prim, prim$1) {
+          if (prim > prim$1) {
+            return prim;
+          } else {
+            return prim$1;
+          }
+        }));
   var _cur = first;
   var _c = count;
   while(true) {
@@ -161,13 +136,10 @@ function move(next, first, count) {
     if (c === 0) {
       return next;
     }
-    if (c % 100 === 0) {
-      console.log(c);
-    }
     var pick1 = Belt_Array.getExn(next, cur);
     var pick2 = Belt_Array.getExn(next, pick1);
     var pick3 = Belt_Array.getExn(next, pick2);
-    var target$1 = target(next, cur, pick1, pick2, pick3);
+    var target$1 = target(cur, pick1, pick2, pick3, maxCup);
     var nextTarget = Belt_Array.getExn(next, target$1);
     var nextPick3 = Belt_Array.getExn(next, pick3);
     Belt_Array.set(next, target$1, pick1);
@@ -207,7 +179,7 @@ function part1(next, _after, _acc) {
 
 function part2(next) {
   var nextOne = Belt_Array.getExn(next, 1);
-  return Math.imul(nextOne, Belt_Array.getExn(next, nextOne));
+  return nextOne * Belt_Array.getExn(next, nextOne);
 }
 
 console.log(part1(move(parse(input, 9), 8, 100), 1, []));
