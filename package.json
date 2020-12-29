@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "bs-let": "^0.1.16",
+    "double-ended-queue": "^2.1.0-0",
     "google-closure-library": "^20201102.0.1"
   }
 }
