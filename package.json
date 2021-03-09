@@ -2,9 +2,9 @@
   "name": "first-reason",
   "version": "0.1.0",
   "scripts": {
-    "build": "bsb -make-world",
-    "start": "bsb -make-world -w",
-    "clean": "bsb -clean-world"
+    "re:build": "bsb -make-world",
+    "re:watch": "bsb -make-world -w",
+    "re:clean": "bsb -clean-world"
   },
   "keywords": [
     "BuckleScript"
@@ -12,7 +12,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "^8.2.0"
+    "bs-platform": "^9.0.1"
   },
   "dependencies": {
     "bs-let": "^0.1.16",
