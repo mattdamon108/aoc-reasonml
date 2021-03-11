@@ -186,7 +186,8 @@ let passports =
 // part1
 let part1 =
   passports
-  ->Array.keep(p => p->Passport.validate(~checkValidFn=checkValid(checkValidFns1))->Result.isOk)
+  ->Array.map(p => p->Passport.validate(~checkValidFn=checkValid(checkValidFns1)))
+  ->Array.keep(p => p->Result.isOk)
   ->Array.length
 
 part1->Js.log
@@ -194,7 +195,8 @@ part1->Js.log
 // part2
 let part2 =
   passports
-  ->Array.keep(p => p->Passport.validate(~checkValidFn=checkValid(checkValidFns2))->Result.isOk)
+  ->Array.map(p => p->Passport.validate(~checkValidFn=checkValid(checkValidFns2)))
+  ->Array.keep(p => p->Result.isOk)
   ->Array.length
 
 part2->Js.log
