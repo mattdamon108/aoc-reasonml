@@ -27,7 +27,10 @@ module type Passport = {
     ~extractFn: string => list<(string, string)>,
     ~init: t<unvalidated>,
   ) => t<unvalidated>
-  let validate: t<unvalidated> => t<validated>
+  let validate: (
+    ~checkValidFn: t<unvalidated> => bool,
+    t<unvalidated>,
+  ) => result<t<validated>, string>
 }
 
 module Passport: Passport = {
@@ -105,7 +108,9 @@ module Passport: Passport = {
     })
   }
 
-  let validate = a => a
+  let validate = (~checkValidFn, p) => {
+    p->checkValidFn ? Ok(p) : Error("validation error")
+  }
 }
 
 let re = %re("/(byr|iyr|eyr|hgt|hcl|ecl|pid|cid):([a-zA-Z0-9#]+)/g")
@@ -170,7 +175,7 @@ let checkValidFns2 = list{
   // cid는 필요 없음
 }
 
-let checkValid = (passport, ~validateFns) =>
+let checkValid = (validateFns, passport) =>
   validateFns->List.map(f => f(passport))->List.every(result => result->Result.isOk)
 
 let passports =
@@ -181,23 +186,28 @@ let passports =
 // part1
 let part1 =
   passports
-  ->Array.reduce(list{}, (validPassports, passport) => {
-    passport->checkValid(~validateFns=checkValidFns1)
-      ? validPassports->List.add(Passport.validate(passport))
-      : validPassports
-  })
-  ->List.length
+  ->Array.keep(p => p->Passport.validate(~checkValidFn=checkValid(checkValidFns1))->Result.isOk)
+  ->Array.length
 
 part1->Js.log
 
 // part2
 let part2 =
   passports
-  ->Array.reduce(list{}, (validPassports, passport) => {
-    passport->checkValid(~validateFns=checkValidFns2)
-      ? validPassports->List.add(Passport.validate(passport))
-      : validPassports
-  })
-  ->List.length
+  ->Array.keep(p => p->Passport.validate(~checkValidFn=checkValid(checkValidFns2))->Result.isOk)
+  ->Array.length
 
 part2->Js.log
+
+// let falsyPassport = {
+//   byr: 0,
+//   iyr: 0,
+//   eyr: 0,
+//   hgt: "",
+//   hcl: "",
+//   ecl: "",
+//   pid: "",
+//   cid: None,
+// }
+
+let falsyValidPassport = Passport.validate(Passport.empty)
