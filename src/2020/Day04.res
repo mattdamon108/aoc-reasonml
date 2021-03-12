@@ -10,7 +10,6 @@ module type Passport = {
   type unvalidated
   type validated
   type t<'a>
-  let empty: t<unvalidated>
 
   let byr: t<'a> => int
   let iyr: t<'a> => int
@@ -21,16 +20,8 @@ module type Passport = {
   let pid: t<'a> => string
   let cid: t<'a> => option<string>
 
-  let extractFnByRe: (Js.Re.t, string) => list<(string, string)>
-  let make: (
-    string,
-    ~extractFn: string => list<(string, string)>,
-    ~init: t<unvalidated>,
-  ) => t<unvalidated>
-  let validate: (
-    ~checkValidFn: t<unvalidated> => bool,
-    t<unvalidated>,
-  ) => result<t<validated>, string>
+  let make: string => option<t<unvalidated>>
+  let validate: t<unvalidated> => option<t<validated>>
 }
 
 module Passport: Passport = {
@@ -52,17 +43,6 @@ module Passport: Passport = {
    */
   type t<'a> = passport
 
-  let empty: t<unvalidated> = {
-    byr: 0,
-    iyr: 0,
-    eyr: 0,
-    hgt: "",
-    hcl: "",
-    ecl: "",
-    pid: "",
-    cid: None,
-  }
-
   let byr = (p: t<'a>) => p.byr
   let iyr = (p: t<'a>) => p.iyr
   let eyr = (p: t<'a>) => p.eyr
@@ -72,7 +52,9 @@ module Passport: Passport = {
   let pid = (p: t<'a>) => p.pid
   let cid = (p: t<'a>) => p.cid
 
-  let extractFnByRe = (re, raw) => {
+  let extractFnByRe = raw => {
+    let re = %re("/(byr|iyr|eyr|hgt|hcl|ecl|pid|cid):([a-zA-Z0-9#]+)/g")
+
     let rec extract = acc => {
       switch Js.Re.exec_(re, raw) {
       | Some(result) =>
@@ -89,127 +71,133 @@ module Passport: Passport = {
     extract(list{})
   }
 
-  let make = (raw, ~extractFn, ~init) => {
-    raw
-    ->extractFn
-    ->List.reduce(init, (passport, field) => {
-      let (k, v) = field
-      switch k {
-      | "byr" => {...passport, byr: v->int_of_string}
-      | "iyr" => {...passport, iyr: v->int_of_string}
-      | "eyr" => {...passport, eyr: v->int_of_string}
-      | "hgt" => {...passport, hgt: v}
-      | "hcl" => {...passport, hcl: v}
-      | "ecl" => {...passport, ecl: v}
-      | "pid" => {...passport, pid: v}
-      | "cid" => {...passport, cid: Some(v)}
-      | _ => passport
-      }
-    })
+  let checkValidFns1 = list{
+    ((k, v)) =>
+      switch v->Belt.Int.fromString {
+      | Some(_) if k === "byr" => Ok(true)
+      | _ => Error("parse error byr")
+      },
+    ((k, v)) =>
+      switch v->Belt.Int.fromString {
+      | Some(_) if k === "iyr" => Ok(true)
+      | _ => Error("parse error iyr")
+      },
+    ((k, v)) =>
+      switch v->Belt.Int.fromString {
+      | Some(_) if k === "eyr" => Ok(true)
+      | _ => Error("parse error eyr")
+      },
+    ((k, _)) => k === "hgt" ? Ok(true) : Error("parse error hgt"),
+    ((k, _)) => k === "hcl" ? Ok(true) : Error("parse error hcl"),
+    ((k, _)) => k === "ecl" ? Ok(true) : Error("parse error ecl"),
+    ((k, _)) => k === "pid" ? Ok(true) : Error("parse error pid"),
+    // cid는 필요 없음
   }
 
-  let validate = (~checkValidFn, p) => {
-    p->checkValidFn ? Ok(p) : Error("validation error")
-  }
-}
-
-let re = %re("/(byr|iyr|eyr|hgt|hcl|ecl|pid|cid):([a-zA-Z0-9#]+)/g")
-
-let checkValidFns1 = list{
-  (p: Passport.t<Passport.unvalidated>) => p->Passport.byr > 0 ? Ok(p) : Error("no byr"),
-  (p: Passport.t<Passport.unvalidated>) => p->Passport.iyr > 0 ? Ok(p) : Error("no iyr"),
-  (p: Passport.t<Passport.unvalidated>) => p->Passport.eyr > 0 ? Ok(p) : Error("no eyr"),
-  (p: Passport.t<Passport.unvalidated>) => p->Passport.hgt !== "" ? Ok(p) : Error("no hgt"),
-  (p: Passport.t<Passport.unvalidated>) => p->Passport.hcl !== "" ? Ok(p) : Error("no hcl"),
-  (p: Passport.t<Passport.unvalidated>) => p->Passport.ecl !== "" ? Ok(p) : Error("no ecl"),
-  (p: Passport.t<Passport.unvalidated>) => p->Passport.pid !== "" ? Ok(p) : Error("no pid"),
-  // cid는 필요 없음
-}
-
-let checkValidFns2 = list{
-  // byr
-  (p: Passport.t<Passport.unvalidated>) =>
-    1920 <= p->Passport.byr && p->Passport.byr <= 2002 ? Ok(p) : Error("no byr"),
-  // iyr
-  (p: Passport.t<Passport.unvalidated>) =>
-    2010 <= p->Passport.iyr && p->Passport.iyr <= 2020 ? Ok(p) : Error("no iyr"),
-  // eyr
-  (p: Passport.t<Passport.unvalidated>) =>
-    2020 <= p->Passport.eyr && p->Passport.eyr <= 2030 ? Ok(p) : Error("no eyr"),
-  // hgt
-  (p: Passport.t<Passport.unvalidated>) => {
-    let re = %re("/^(\d+)(cm|in)$/g")
-    switch Js.Re.exec_(re, p->Passport.hgt) {
-    | Some(result) =>
-      let captured = result->Js.Re.captures->Array.map(Js.Nullable.toOption)->Array.keepMap(x => x)
-      switch (captured->Array.get(1)->Option.flatMap(Int.fromString), captured->Array.get(2)) {
-      | (Some(h), Some(u)) =>
-        switch u {
-        | "cm" => 150 <= h && h <= 193 ? Ok(p) : Error("invalid hgt")
-        | "in" => 59 <= h && h <= 76 ? Ok(p) : Error("invalid hgt")
-        | _ => Error("invalid hgt")
+  let checkValidFns2 = list{
+    // byr
+    (p: t<unvalidated>) => 1920 <= p->byr && p->byr <= 2002 ? Ok(true) : Error("no byr"),
+    // iyr
+    (p: t<unvalidated>) => 2010 <= p->iyr && p->iyr <= 2020 ? Ok(true) : Error("no iyr"),
+    // eyr
+    (p: t<unvalidated>) => 2020 <= p->eyr && p->eyr <= 2030 ? Ok(true) : Error("no eyr"),
+    // hgt
+    (p: t<unvalidated>) => {
+      let re = %re("/^(\d+)(cm|in)$/g")
+      switch Js.Re.exec_(re, p->hgt) {
+      | Some(result) =>
+        let captured =
+          result->Js.Re.captures->Array.map(Js.Nullable.toOption)->Array.keepMap(x => x)
+        switch (captured->Array.get(1)->Option.flatMap(Int.fromString), captured->Array.get(2)) {
+        | (Some(h), Some(u)) =>
+          switch u {
+          | "cm" => 150 <= h && h <= 193 ? Ok(true) : Error("invalid hgt")
+          | "in" => 59 <= h && h <= 76 ? Ok(true) : Error("invalid hgt")
+          | _ => Error("invalid hgt")
+          }
+        | (_, _) => Error("invalid hgt")
         }
-      | (_, _) => Error("invalid hgt")
+      | None => Error("invalid hgt")
       }
-    | None => Error("invalid hgt")
+    },
+    // hcl
+    (p: t<unvalidated>) => {
+      let re = %re("/^#[0-9|a-f]{6}$/g")
+      Js.Re.test_(re, p->hcl) ? Ok(true) : Error("invalid hcl")
+    },
+    // ecl
+    (p: t<unvalidated>) => {
+      ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]->Array.some(option => option === p->ecl)
+        ? Ok(true)
+        : Error("invalid ecl")
+    },
+    // pid
+    (p: t<unvalidated>) => {
+      let re = %re("/^[0-9]{9}$/g")
+      Js.Re.test_(re, p->pid) ? Ok(true) : Error("invalid pid")
+    },
+    // cid는 필요 없음
+  }
+
+  let make = raw => {
+    let extractedPairs = raw->extractFnByRe
+    let isValid =
+      checkValidFns1
+      ->List.map(f => {
+        extractedPairs->List.map(pair => pair->f)->List.keep(x => x->Result.isOk)->List.length > 0
+          ? true
+          : false
+      })
+      ->List.every(x => x)
+
+    let emptyPassport: t<unvalidated> = {
+      byr: 0,
+      iyr: 0,
+      eyr: 0,
+      hgt: "",
+      hcl: "",
+      ecl: "",
+      pid: "",
+      cid: None,
     }
-  },
-  // hcl
-  (p: Passport.t<Passport.unvalidated>) => {
-    let re = %re("/^#[0-9|a-f]{6}$/g")
-    Js.Re.test_(re, p->Passport.hcl) ? Ok(p) : Error("invalid hcl")
-  },
-  // ecl
-  (p: Passport.t<Passport.unvalidated>) => {
-    ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]->Array.some(option =>
-      option === p->Passport.ecl
-    )
-      ? Ok(p)
-      : Error("invalid ecl")
-  },
-  // pid
-  (p: Passport.t<Passport.unvalidated>) => {
-    let re = %re("/^[0-9]{9}$/g")
-    Js.Re.test_(re, p->Passport.pid) ? Ok(p) : Error("invalid pid")
-  },
-  // cid는 필요 없음
+
+    isValid
+      ? extractedPairs
+        ->List.reduce(emptyPassport, (passport, field) => {
+          let (k, v) = field
+          switch k {
+          | "byr" => {...passport, byr: v->int_of_string}
+          | "iyr" => {...passport, iyr: v->int_of_string}
+          | "eyr" => {...passport, eyr: v->int_of_string}
+          | "hgt" => {...passport, hgt: v}
+          | "hcl" => {...passport, hcl: v}
+          | "ecl" => {...passport, ecl: v}
+          | "pid" => {...passport, pid: v}
+          | "cid" => {...passport, cid: Some(v)}
+          | _ => passport
+          }
+        })
+        ->Some
+      : None
+  }
+
+  let validate = passport => {
+    let isValid =
+      checkValidFns2->List.map(f => f(passport))->List.every(result => result->Result.isOk)
+    isValid ? passport->Some : None
+  }
 }
-
-let checkValid = (validateFns, passport) =>
-  validateFns->List.map(f => f(passport))->List.every(result => result->Result.isOk)
-
-let passports =
-  input
-  ->Js.String2.split("\n\n")
-  ->Array.map(Passport.make(~extractFn=Passport.extractFnByRe(re), ~init=Passport.empty))
 
 // part1
-let part1 =
-  passports
-  ->Array.map(p => p->Passport.validate(~checkValidFn=checkValid(checkValidFns1)))
-  ->Array.keep(p => p->Result.isOk)
-  ->Array.length
+let unvalidatedPassports =
+  input->Js.String2.split("\n\n")->Array.map(Passport.make)->Array.keepMap(x => x)
 
-part1->Js.log
+unvalidatedPassports->Array.length->Js.log
 
 // part2
-let part2 =
-  passports
-  ->Array.map(p => p->Passport.validate(~checkValidFn=checkValid(checkValidFns2)))
-  ->Array.keep(p => p->Result.isOk)
-  ->Array.length
+let validatedPassports =
+  unvalidatedPassports
+  ->Array.map(unvalidatedPassport => unvalidatedPassport->Passport.validate)
+  ->Array.keepMap(x => x)
 
-part2->Js.log
-
-// let falsyPassport = {
-//   byr: 0,
-//   iyr: 0,
-//   eyr: 0,
-//   hgt: "",
-//   hcl: "",
-//   ecl: "",
-//   pid: "",
-//   cid: None,
-// }
-
-let falsyValidPassport = Passport.validate(Passport.empty)
+validatedPassports->Array.length->Js.log
