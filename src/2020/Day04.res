@@ -71,78 +71,33 @@ module Passport: Passport = {
     extract(list{})
   }
 
-  let checkValidFns1 = list{
-    ((k, v)) =>
-      switch v->Belt.Int.fromString {
-      | Some(_) if k === "byr" => Ok(true)
-      | _ => Error("parse error byr")
-      },
-    ((k, v)) =>
-      switch v->Belt.Int.fromString {
-      | Some(_) if k === "iyr" => Ok(true)
-      | _ => Error("parse error iyr")
-      },
-    ((k, v)) =>
-      switch v->Belt.Int.fromString {
-      | Some(_) if k === "eyr" => Ok(true)
-      | _ => Error("parse error eyr")
-      },
-    ((k, _)) => k === "hgt" ? Ok(true) : Error("parse error hgt"),
-    ((k, _)) => k === "hcl" ? Ok(true) : Error("parse error hcl"),
-    ((k, _)) => k === "ecl" ? Ok(true) : Error("parse error ecl"),
-    ((k, _)) => k === "pid" ? Ok(true) : Error("parse error pid"),
-    // cid는 필요 없음
-  }
-
-  let checkValidFns2 = list{
-    // byr
-    (p: t<unvalidated>) => 1920 <= p->byr && p->byr <= 2002 ? Ok(true) : Error("no byr"),
-    // iyr
-    (p: t<unvalidated>) => 2010 <= p->iyr && p->iyr <= 2020 ? Ok(true) : Error("no iyr"),
-    // eyr
-    (p: t<unvalidated>) => 2020 <= p->eyr && p->eyr <= 2030 ? Ok(true) : Error("no eyr"),
-    // hgt
-    (p: t<unvalidated>) => {
-      let re = %re("/^(\d+)(cm|in)$/g")
-      switch Js.Re.exec_(re, p->hgt) {
-      | Some(result) =>
-        let captured =
-          result->Js.Re.captures->Array.map(Js.Nullable.toOption)->Array.keepMap(x => x)
-        switch (captured->Array.get(1)->Option.flatMap(Int.fromString), captured->Array.get(2)) {
-        | (Some(h), Some(u)) =>
-          switch u {
-          | "cm" => 150 <= h && h <= 193 ? Ok(true) : Error("invalid hgt")
-          | "in" => 59 <= h && h <= 76 ? Ok(true) : Error("invalid hgt")
-          | _ => Error("invalid hgt")
-          }
-        | (_, _) => Error("invalid hgt")
-        }
-      | None => Error("invalid hgt")
-      }
-    },
-    // hcl
-    (p: t<unvalidated>) => {
-      let re = %re("/^#[0-9|a-f]{6}$/g")
-      Js.Re.test_(re, p->hcl) ? Ok(true) : Error("invalid hcl")
-    },
-    // ecl
-    (p: t<unvalidated>) => {
-      ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]->Array.some(option => option === p->ecl)
-        ? Ok(true)
-        : Error("invalid ecl")
-    },
-    // pid
-    (p: t<unvalidated>) => {
-      let re = %re("/^[0-9]{9}$/g")
-      Js.Re.test_(re, p->pid) ? Ok(true) : Error("invalid pid")
-    },
-    // cid는 필요 없음
-  }
-
   let make = raw => {
+    let checkValidFns = list{
+      ((k, v)) =>
+        switch v->Belt.Int.fromString {
+        | Some(_) if k === "byr" => Ok(true)
+        | _ => Error("parse error byr")
+        },
+      ((k, v)) =>
+        switch v->Belt.Int.fromString {
+        | Some(_) if k === "iyr" => Ok(true)
+        | _ => Error("parse error iyr")
+        },
+      ((k, v)) =>
+        switch v->Belt.Int.fromString {
+        | Some(_) if k === "eyr" => Ok(true)
+        | _ => Error("parse error eyr")
+        },
+      ((k, _)) => k === "hgt" ? Ok(true) : Error("parse error hgt"),
+      ((k, _)) => k === "hcl" ? Ok(true) : Error("parse error hcl"),
+      ((k, _)) => k === "ecl" ? Ok(true) : Error("parse error ecl"),
+      ((k, _)) => k === "pid" ? Ok(true) : Error("parse error pid"),
+      // cid는 필요 없음
+    }
+
     let extractedPairs = raw->extractFnByRe
     let isValid =
-      checkValidFns1
+      checkValidFns
       ->List.map(f => {
         extractedPairs->List.map(pair => pair->f)->List.keep(x => x->Result.isOk)->List.length > 0
           ? true
@@ -182,8 +137,53 @@ module Passport: Passport = {
   }
 
   let validate = passport => {
+    let checkValidFns = list{
+      // byr
+      (p: t<unvalidated>) => 1920 <= p->byr && p->byr <= 2002 ? Ok(true) : Error("no byr"),
+      // iyr
+      (p: t<unvalidated>) => 2010 <= p->iyr && p->iyr <= 2020 ? Ok(true) : Error("no iyr"),
+      // eyr
+      (p: t<unvalidated>) => 2020 <= p->eyr && p->eyr <= 2030 ? Ok(true) : Error("no eyr"),
+      // hgt
+      (p: t<unvalidated>) => {
+        let re = %re("/^(\d+)(cm|in)$/g")
+        switch Js.Re.exec_(re, p->hgt) {
+        | Some(result) =>
+          let captured =
+            result->Js.Re.captures->Array.map(Js.Nullable.toOption)->Array.keepMap(x => x)
+          switch (captured->Array.get(1)->Option.flatMap(Int.fromString), captured->Array.get(2)) {
+          | (Some(h), Some(u)) =>
+            switch u {
+            | "cm" => 150 <= h && h <= 193 ? Ok(true) : Error("invalid hgt")
+            | "in" => 59 <= h && h <= 76 ? Ok(true) : Error("invalid hgt")
+            | _ => Error("invalid hgt")
+            }
+          | (_, _) => Error("invalid hgt")
+          }
+        | None => Error("invalid hgt")
+        }
+      },
+      // hcl
+      (p: t<unvalidated>) => {
+        let re = %re("/^#[0-9|a-f]{6}$/g")
+        Js.Re.test_(re, p->hcl) ? Ok(true) : Error("invalid hcl")
+      },
+      // ecl
+      (p: t<unvalidated>) => {
+        ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]->Array.some(option => option === p->ecl)
+          ? Ok(true)
+          : Error("invalid ecl")
+      },
+      // pid
+      (p: t<unvalidated>) => {
+        let re = %re("/^[0-9]{9}$/g")
+        Js.Re.test_(re, p->pid) ? Ok(true) : Error("invalid pid")
+      },
+      // cid는 필요 없음
+    }
+
     let isValid =
-      checkValidFns2->List.map(f => f(passport))->List.every(result => result->Result.isOk)
+      checkValidFns->List.map(f => f(passport))->List.every(result => result->Result.isOk)
     isValid ? passport->Some : None
   }
 }
@@ -195,9 +195,6 @@ let unvalidatedPassports =
 unvalidatedPassports->Array.length->Js.log
 
 // part2
-let validatedPassports =
-  unvalidatedPassports
-  ->Array.map(unvalidatedPassport => unvalidatedPassport->Passport.validate)
-  ->Array.keepMap(x => x)
+let validatedPassports = unvalidatedPassports->Array.map(Passport.validate)->Array.keepMap(x => x)
 
 validatedPassports->Array.length->Js.log
