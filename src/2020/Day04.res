@@ -62,11 +62,9 @@ module Passport: Passport = {
         ),
       // byr, iyr, eyr 항목의 값이 숫자인지 확인
       m =>
-        ["byr", "iyr", "eyr"]
-        ->Array.keepMap(field =>
-          m->Map.String.get(field)->Option.flatMap(value => value->Int.fromString)
-        )
-        ->Array.length === 3,
+        ["byr", "iyr", "eyr"]->Array.every(field =>
+          m->Map.String.get(field)->Option.flatMap(value => value->Int.fromString)->Option.isSome
+        ),
     }
 
     let extracted = raw->extract
