@@ -96,11 +96,11 @@ module Passport: Passport = {
   let validate = passport => {
     let checkValidFns = list{
       // byr
-      (p: t<unvalidated>) => 1920 <= p.byr && p.byr <= 2002 ? Ok(true) : Error("no byr"),
+      (p: t<unvalidated>) => 1920 <= p.byr && p.byr <= 2002 ? Ok("ok byr") : Error("invalid byr"),
       // iyr
-      (p: t<unvalidated>) => 2010 <= p.iyr && p.iyr <= 2020 ? Ok(true) : Error("no iyr"),
+      (p: t<unvalidated>) => 2010 <= p.iyr && p.iyr <= 2020 ? Ok("ok iyr") : Error("invalid iyr"),
       // eyr
-      (p: t<unvalidated>) => 2020 <= p.eyr && p.eyr <= 2030 ? Ok(true) : Error("no eyr"),
+      (p: t<unvalidated>) => 2020 <= p.eyr && p.eyr <= 2030 ? Ok("ok eyr") : Error("invalid eyr"),
       // hgt
       (p: t<unvalidated>) => {
         let re = %re("/^(\d+)(cm|in)$/g")
@@ -111,8 +111,8 @@ module Passport: Passport = {
           switch (captured->Array.get(1)->Option.flatMap(Int.fromString), captured->Array.get(2)) {
           | (Some(h), Some(u)) =>
             switch u {
-            | "cm" => 150 <= h && h <= 193 ? Ok(true) : Error("invalid hgt")
-            | "in" => 59 <= h && h <= 76 ? Ok(true) : Error("invalid hgt")
+            | "cm" => 150 <= h && h <= 193 ? Ok("ok hgt") : Error("invalid hgt")
+            | "in" => 59 <= h && h <= 76 ? Ok("ok hgt") : Error("invalid hgt")
             | _ => Error("invalid hgt")
             }
           | (_, _) => Error("invalid hgt")
@@ -123,18 +123,18 @@ module Passport: Passport = {
       // hcl
       (p: t<unvalidated>) => {
         let re = %re("/^#[0-9|a-f]{6}$/g")
-        Js.Re.test_(re, p.hcl) ? Ok(true) : Error("invalid hcl")
+        Js.Re.test_(re, p.hcl) ? Ok("ok hcl") : Error("invalid hcl")
       },
       // ecl
       (p: t<unvalidated>) => {
         ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]->Array.some(option => option === p.ecl)
-          ? Ok(true)
+          ? Ok("ok ecl")
           : Error("invalid ecl")
       },
       // pid
       (p: t<unvalidated>) => {
         let re = %re("/^[0-9]{9}$/g")
-        Js.Re.test_(re, p.pid) ? Ok(true) : Error("invalid pid")
+        Js.Re.test_(re, p.pid) ? Ok("ok pid") : Error("invalid pid")
       },
       // cid는 필요 없음
     }
