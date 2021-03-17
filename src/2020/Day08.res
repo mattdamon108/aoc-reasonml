@@ -1,74 +1,109 @@
 open Belt
 
-let inputTest =
-  Node_fs.readFileAsUtf8Sync("input/2020/day08test")->Js.String2.trim->Js.String2.split("\n")
+let inputTest = Node_fs.readFileAsUtf8Sync("input/2020/day08test")->Js.String2.trim
 
-let input = Node_fs.readFileAsUtf8Sync("input/2020/day08")->Js.String2.trim->Js.String2.split("\n")
+let input = Node_fs.readFileAsUtf8Sync("input/2020/day08")->Js.String2.trim
 
-module Interpreter = {
-  type t
+module type Interpreter = {
+  type instruction
+  type state
+  let parse: string => array<instruction>
+  let patch: instruction => instruction
+  let run: array<instruction> => int
+  let runWithPatch: (array<instruction>, ~patchFn: instruction => instruction) => int
+}
 
-  let parse = input =>
-    input->Array.map(i => {
-      let splitted = i->Js.String2.split(" ")
-      let value = splitted->Array.getExn(1)->int_of_string
-      (splitted->Array.getExn(0), value)
+module Interpreter: Interpreter = {
+  type instruction = NOP(int) | ACC(int) | JMP(int)
+  type cursor = int
+  type state = {
+    cursor: cursor,
+    acc: int,
+    log: list<cursor>,
+  }
+
+  let parse = data =>
+    data
+    ->Js.String2.split("\n")
+    ->Array.keepMap(line => {
+      let splitted = line->Js.String2.trim->Js.String2.split(" ")
+      let command = splitted[0]
+      let value = splitted[1]->Option.flatMap(v => v->Int.fromString)
+      switch (command, value) {
+      | (Some(c), Some(v)) =>
+        switch c {
+        | "nop" => Some(NOP(v))
+        | "acc" => Some(ACC(v))
+        | "jmp" => Some(JMP(v))
+        | _ => None
+        }
+      | (_, _) => None
+      }
     })
 
-  let rec interpret = (inst, cur, acc, history) =>
-    if history->Array.some(h => h === cur) {
-      Error(acc)
-    } else if cur === inst->Array.length - 1 {
-      let (command, value) = inst->Array.getExn(cur)
-      switch command {
-      | "nop" => Ok(acc)
-      | "acc" => Ok(acc + value)
-      | "jmp" => Ok(acc)
-      | _ => Ok(acc)
+  let rec interpret = (instructions: array<instruction>, state) =>
+    if state.log->List.some(h => h === state.cursor) {
+      // 이미 실행한 instruction이 있을 때
+      Error(state)
+    } else if state.cursor === instructions->Array.length - 1 {
+      // instruction을 끝까지 다 수행했을 때
+      switch instructions->Array.getExn(state.cursor) {
+      | NOP(_) => Ok(state)
+      | ACC(v) => Ok({...state, acc: state.acc + v})
+      | JMP(_) => Ok(state)
       }
     } else {
-      let (command, value) = inst->Array.getExn(cur)
-      let newHistory = history->Array.concat([cur])
-      switch command {
-      | "nop" => interpret(inst, cur + 1, acc, newHistory)
-      | "acc" => interpret(inst, cur + 1, acc + value, newHistory)
-      | "jmp" => interpret(inst, cur + value, acc, newHistory)
-      | _ => interpret(inst, cur, acc, history)
+      // 계속 진행하는 경우
+      // let (command, value) = inst->Array.getExn(cur)
+      let newLog = state.log->List.add(state.cursor)
+      switch instructions->Array.getExn(state.cursor) {
+      | NOP(_) => interpret(instructions, {...state, cursor: state.cursor + 1, log: newLog})
+      | ACC(v) =>
+        interpret(instructions, {cursor: state.cursor + 1, acc: state.acc + v, log: newLog})
+      | JMP(v) => interpret(instructions, {...state, cursor: state.cursor + v, log: newLog})
       }
+    }
+
+  let findBroken = (instructions, start) => {
+    let rec seek = pos => {
+      switch instructions->Array.getExn(pos) {
+      | NOP(v) => (NOP(v), pos)
+      | JMP(v) => (JMP(v), pos)
+      | ACC(_) => seek(pos + 1)
+      }
+    }
+
+    seek(start)
+  }
+
+  let patch = instruction =>
+    switch instruction {
+    | NOP(v) => JMP(v)
+    | JMP(v) => NOP(v)
+    | _ => instruction
     }
 
   let run = instructions =>
-    switch instructions->interpret(0, 0, []) {
-    | Error(acc) => acc
-    | _ => -1 // something wrong here;
+    switch instructions->interpret({cursor: 0, acc: 0, log: list{}}) {
+    | Error(state) => state.acc
+    | Ok(_) => -1 // Ok가 나오면 이상한 상황!
     }
 
-  let patch = brokenInstructions => {
-    let finder = (instructions, start) => {
-      let rec seek = pos => {
-        let (command, value) = instructions->Array.getExn(pos)
-        command === "nop" || command === "jmp" ? (command, value, pos) : seek(pos + 1)
-      }
-
-      seek(start)
-    }
-
-    let rec run = (instructions, brokenPos) =>
-      switch instructions->interpret(0, 0, []) {
-      | Ok(ac) => ac
-      | Error(_) =>
-        let (command, value, newBrokenPos) = finder(instructions, brokenPos)
-        let newCommand = switch command {
-        | "nop" => "jmp"
-        | "jmp" => "nop"
-        | _ => command
+  let runWithPatch = (instructions, ~patchFn) => {
+    let rec patcher = (brokenInstructions, brokenPos) => {
+      switch brokenInstructions->interpret({cursor: 0, acc: 0, log: list{}}) {
+      | Ok(state) => state.acc
+      | Error(_) => {
+          let (brokenInstruction, newBrokenPos) = findBroken(brokenInstructions, brokenPos)
+          let fixedInstruction = patchFn(brokenInstruction)
+          let fixedInstructions = Array.copy(instructions)
+          fixedInstructions->Array.setUnsafe(newBrokenPos, fixedInstruction)
+          patcher(fixedInstructions, newBrokenPos + 1)
         }
-        let newInstructions = Array.copy(brokenInstructions)
-        newInstructions->Array.setUnsafe(newBrokenPos, (newCommand, value))
-        run(newInstructions, newBrokenPos + 1)
       }
+    }
 
-    run(brokenInstructions, 0)
+    patcher(instructions, 0)
   }
 }
 
@@ -76,4 +111,4 @@ module Interpreter = {
 input->Interpreter.parse->Interpreter.run->Js.log
 
 // part2
-input->Interpreter.parse->Interpreter.patch->Js.log
+input->Interpreter.parse->Interpreter.runWithPatch(~patchFn=Interpreter.patch)->Js.log
