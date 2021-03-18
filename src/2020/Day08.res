@@ -16,12 +16,17 @@ module type Interpreter = {
 
 module Interpreter: Interpreter = {
   type instruction = NOP(int) | ACC(int) | JMP(int)
+
   type instructions = Map.Int.t<instruction>
+  
+  type log = Set.Int.t
+  
   type cursor = int
+  
   type state = {
     cursor: cursor,
     acc: int,
-    log: list<cursor>,
+    log: log,
   }
 
   let parse = data =>
@@ -47,7 +52,7 @@ module Interpreter: Interpreter = {
     })
 
   let rec interpret = (instructions: Map.Int.t<instruction>, state) => {
-    if state.log->List.some(h => h === state.cursor) {
+    if state.log->Set.Int.some(h => h === state.cursor) {
       // 이미 실행한 instruction이 있을 때
       Error(state)
     } else if state.cursor === instructions->Map.Int.size - 1 {
@@ -59,7 +64,7 @@ module Interpreter: Interpreter = {
       }
     } else {
       // 계속 진행하는 경우
-      let newLog = state.log->List.add(state.cursor)
+      let newLog = state.log->Set.Int.add(state.cursor)
       switch instructions->Map.Int.getExn(state.cursor) {
       | NOP(_) => interpret(instructions, {...state, cursor: state.cursor + 1, log: newLog})
       | ACC(v) =>
@@ -89,14 +94,14 @@ module Interpreter: Interpreter = {
     }
 
   let run = instructions =>
-    switch instructions->interpret({cursor: 0, acc: 0, log: list{}}) {
+    switch instructions->interpret({cursor: 0, acc: 0, log: Set.Int.empty}) {
     | Error(state) => state.acc
     | Ok(_) => -1 // Ok가 나오면 이상한 상황!
     }
 
   let runWithPatch = (instructions, ~patchFn) => {
     let rec patcher = (brokenInstructions, brokenPos) => {
-      switch brokenInstructions->interpret({cursor: 0, acc: 0, log: list{}}) {
+      switch brokenInstructions->interpret({cursor: 0, acc: 0, log: Set.Int.empty}) {
       | Ok(state) => state.acc
       | Error(_) => {
           let (brokenInstruction, newBrokenPos) = findBroken(brokenInstructions, brokenPos)
