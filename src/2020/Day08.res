@@ -6,15 +6,17 @@ let input = Node_fs.readFileAsUtf8Sync("input/2020/day08")->Js.String2.trim
 
 module type Interpreter = {
   type instruction
+  type instructions
   type state
-  let parse: string => Map.Int.t<instruction>
+  let parse: string => instructions
   let patch: instruction => instruction
-  let run: Map.Int.t<instruction> => int
-  let runWithPatch: (Map.Int.t<instruction>, ~patchFn: instruction => instruction) => int
+  let run: instructions => int
+  let runWithPatch: (instructions, ~patchFn: instruction => instruction) => int
 }
 
 module Interpreter: Interpreter = {
   type instruction = NOP(int) | ACC(int) | JMP(int)
+  type instructions = Map.Int.t<instruction>
   type cursor = int
   type state = {
     cursor: cursor,
