@@ -29,6 +29,8 @@ module Interpreter: Interpreter = {
     log: log,
   }
 
+  type terminate = TERMINATE | QUIT | LOOP
+
   let parse = data =>
     data
     ->Js.String2.split("\n")
@@ -51,6 +53,19 @@ module Interpreter: Interpreter = {
       instructions->Map.Int.set(idx, instruction)
     })
 
+  let terminate = (instructions, state) => {
+    if state.log->Set.Int.some(l => l === state.cursor) {
+      // 이미 실행한 instruction이 있을 때
+      TERMINATE
+    } else if state.cursor === instructions->Map.Int.size - 1 {
+      // instruction을 끝까지 다 수행했을 때
+      QUIT
+    } else {
+      // 계속 진행하는 경우
+      LOOP
+    }
+  }
+
   let changeState = (instruction, state) => {
     let newLog = state.log->Set.Int.add(state.cursor)
     switch instruction {
@@ -60,21 +75,17 @@ module Interpreter: Interpreter = {
     }
   }
 
-  let interpret = (instructions: Map.Int.t<instruction>, initState, ~changeStateFn) => {
+  let interpret = (
+    instructions: Map.Int.t<instruction>,
+    initState,
+    ~terminateFn,
+    ~changeStateFn,
+  ) => {
     let rec interpreter = state => {
-      if state.log->Set.Int.some(h => h === state.cursor) {
-        // 이미 실행한 instruction이 있을 때
-        Error(state)
-      } else if state.cursor === instructions->Map.Int.size - 1 {
-        // instruction을 끝까지 다 수행했을 때
-        switch instructions->Map.Int.getExn(state.cursor) {
-        | NOP(_) => Ok(state)
-        | ACC(v) => Ok({...state, acc: state.acc + v})
-        | JMP(_) => Ok(state)
-        }
-      } else {
-        // 계속 진행하는 경우
-        instructions->Map.Int.getExn(state.cursor)->changeStateFn(state)->interpreter
+      switch instructions->terminateFn(state) {
+      | TERMINATE => Error(state)
+      | QUIT => instructions->Map.Int.getExn(state.cursor)->changeStateFn(state)->Ok
+      | LOOP => instructions->Map.Int.getExn(state.cursor)->changeStateFn(state)->interpreter
       }
     }
 
@@ -103,6 +114,7 @@ module Interpreter: Interpreter = {
   let run = instructions =>
     switch instructions->interpret(
       {cursor: 0, acc: 0, log: Set.Int.empty},
+      ~terminateFn=terminate,
       ~changeStateFn=changeState,
     ) {
     | Error(state) => state.acc
@@ -113,6 +125,7 @@ module Interpreter: Interpreter = {
     let rec patcher = (brokenInstructions, brokenPos) => {
       switch brokenInstructions->interpret(
         {cursor: 0, acc: 0, log: Set.Int.empty},
+        ~terminateFn=terminate,
         ~changeStateFn=changeState,
       ) {
       | Ok(state) => state.acc
